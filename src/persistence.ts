@@ -20,7 +20,7 @@ export interface CharacterRecord {
 	routed_to: string
 }
 
-export type SceneStatus = "running" | "complete" | "published";
+export type SceneStatus = "running" | "complete";
 
 export class Database {
 	private db: sqlite3.Database;
@@ -54,6 +54,7 @@ export class Database {
 	}
 
 	async newCharacter(char: Character, owner: Snowflake): Promise<void> {
+		//TODO: like newScene make this return the new id
 		await this.db.run(
 			`INSERT INTO characters (owner, name, splat, json, status, created)
 			 VALUES ($owner, $name, $splat, $json, $status, $created)`, {
