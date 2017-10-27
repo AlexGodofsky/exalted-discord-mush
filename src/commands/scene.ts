@@ -1,6 +1,7 @@
 import * as yargs from "yargs";
 
-import { Message, respond, respondDM } from "../message-handler";
+import { respond, respondDM } from "../message-handler";
+import { Message } from "../discord-mock";
 
 export const command = "scene <command>";
 export const aliases: string[] = [];

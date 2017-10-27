@@ -1,6 +1,7 @@
 import * as yargs from "yargs";
 
-import { Message, respond, respondDM } from "../../message-handler";
+import { respond, respondDM } from "../../message-handler";
+import { Message } from "../../discord-mock"
 import { Database } from "../../persistence";
 
 export const command = "join <scene_id> <char_name>";

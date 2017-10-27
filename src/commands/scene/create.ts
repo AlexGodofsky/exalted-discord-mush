@@ -1,7 +1,9 @@
 import * as yargs from "yargs";
 
-import { Message, respond, respondDM } from "../../message-handler";
+import { respond, respondDM } from "../../message-handler";
+import { Message } from "../../discord-mock"
 import { Database } from "../../persistence";
+import sceneManager from "../../scene-manager";
 
 export const command = "create <title>";
 export const aliases: string[] = [];
@@ -23,7 +25,9 @@ export async function handler(argv: yargs.Arguments) {
 };
 
 export async function create(db: Database, message: Message, title: string) {
-	throw Error("unimplemented");
+	if (message.channel.type !== "text") throw Error(`You can only create a scene in one of the public channels.`);
+	const id = await sceneManager.create(db, title, message.author.id, message.channel.id);
+	await respond(message, `Successfully created #${id}, "${title}", in ${message.channel.name}`);
 }
 
 export default create;

@@ -1,6 +1,7 @@
 import * as yargs from "yargs";
 
-import { Message, respond, respondDM } from "../message-handler";
+import { respond, respondDM } from "../message-handler";
+import { Message } from "../discord-mock";
 import { Database } from "../persistence";
 import { newCharacter as char_newCharacter, SplatName } from "../character";
 

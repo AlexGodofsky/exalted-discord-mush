@@ -1,6 +1,8 @@
 import * as sqlite3 from "sqlite";
+import { Database as Driver } from "sqlite3";
 import * as moment from "moment";
 import { Snowflake } from "discord.js";
+
 import { Character, SplatName } from "./character";
 
 export type CharacterStatus = "new" | "submitted" | "approved";
@@ -18,11 +20,15 @@ export interface CharacterRecord {
 	routed_to: string
 }
 
+export type SceneStatus = "running" | "complete" | "published";
+
 export class Database {
 	private db: sqlite3.Database;
+	private driver: Driver;
 
 	constructor(db: sqlite3.Database) {
 		this.db = db;
+		this.driver = (<any>db).driver;
 	}
 
 	async getCharacter(identifier: number | string): Promise<CharacterRecord> {
@@ -69,6 +75,35 @@ export class Database {
 			$json: JSON.stringify(char)
 		});
 	}
+
+	async newScene(title: string, owner: Snowflake, location: Snowflake): Promise<number> {
+		//TODO: stress test this to make sure the serialization guarantee actually works
+		return new Promise<number>((resolve, reject) => {
+			this.driver.serialize(async () => {
+				this.db.run(
+					`INSERT INTO scenes (owner, title, location, status, created)
+					VALUES ($owner, $title, $location, $status, $created);`, {
+					$owner: owner,
+					$title: title,
+					$location: location,
+					$status: "running",
+					$created: moment().valueOf()
+				});
+				resolve((await this.db.get(`SELECT last_insert_rowid() as id;`)).id);
+			});
+		});
+		//alternate code for when we do the stress test, to verify that we're capable of detecting races at all
+		// await this.db.run(
+		// 	`INSERT INTO scenes (owner, title, location, status, created)
+		// 	VALUES ($owner, $title, $location, $status, $created);`, {
+		// 	$owner: owner,
+		// 	$title: title,
+		// 	$location: location,
+		// 	$status: "running",
+		// 	$created: moment().valueOf()
+		// });
+		// return (await this.db.get(`SELECT last_insert_rowid() as id;`)).id;
+	}
 }
 
 export async function startDB(clean: boolean): Promise<Database> {
@@ -104,7 +139,7 @@ export async function startDB(clean: boolean): Promise<Database> {
 						routed_to TEXT,
 					FOREIGN KEY(character) REFERENCES characters(id))`),
 		sqlite.run(`CREATE TABLE IF NOT EXISTS scenes
-					(id INTEGER PRIMARY KEY, owner TEXT, name TEXT, location TEXT, status TEXT,
+					(id INTEGER PRIMARY KEY, owner TEXT, title TEXT, location TEXT, status TEXT,
 						created INTEGER, completed INTEGER)`),
 		sqlite.run(`CREATE TABLE IF NOT EXISTS scene_lines
 					(id INTEGER PRIMARY KEY, scene INTEGER, character INTEGER, message TEXT, type TEXT,

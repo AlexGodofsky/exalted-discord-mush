@@ -1,24 +1,8 @@
 //import { Message } from "discord.js";
 import * as yargs from "yargs";
 
-import { Database } from "../src/persistence";
-
-export interface Message {
-	author: {
-		bot: boolean;
-		id: string;
-		createDM: () => Promise<DMChannel>;
-	};
-	content: string;
-	channel: TextChannel | DMChannel;
-}
-
-interface Channel {
-	send: (content: string) => Promise<any>
-}
-
-interface TextChannel extends DMChannel {}
-interface DMChannel extends Channel {}
+import { Database } from "./persistence";
+import { Message } from "./discord-mock";
 
 // just the options necessary for message-handler
 interface MessageConfig {

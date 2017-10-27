@@ -4,7 +4,8 @@ import * as chaiAsPromised from "chai-as-promised";
 import * as yargs from "yargs";
 
 import { Database, startDB } from "../src/persistence";
-import { Message, handleMessage } from "../src/message-handler";
+import { handleMessage } from "../src/message-handler";
+import { Message, Channel, TextChannel, DMChannel } from "../src/discord-mock";
 import { Character } from "../src/character";
 import newCharacter from "../src/commands/new-character";
 
@@ -25,16 +26,25 @@ async function mockResponse(content: string) {
 	responses.push(content);
 }
 
-const mockChannel = {
-	send: mockResponse
+const mockChannel: TextChannel = {
+	id: "public",
+	send: mockResponse,
+	name: "Teahouse",
+	type: "text"
 };
 
-async function mockMessage(content: string): Promise<Message> {
+const mockDM: DMChannel = {
+	id: "private",
+	send: mockResponse,
+	type: "dm"
+}
+
+async function mockMessage(content: string, channel: Channel): Promise<Message> {
 	const message = {
 		author: {
 			bot: false,
 			id: "test",
-			createDM: async () => mockChannel
+			createDM: async () => mockDM
 		},
 		content: content,
 		channel: mockChannel
@@ -53,7 +63,7 @@ beforeEach("clear responses", () => {
 
 describe("new-character", () => {
 	beforeEach("create the new character", async () => {
-		await mockMessage("new-character Johnnie Mortal");
+		await mockMessage("new-character Johnnie Mortal", mockDM);
 	});
 
 	it("should tell me it was successful", async () => {
@@ -75,8 +85,8 @@ describe("new-character", () => {
 describe("fuzzy-matching", () => {
 	beforeEach("creating multiple characters", async () => {
 		await [
-			mockMessage("new-character Jonathan Mortal"),
-			mockMessage("new-character Nathaniel Solar")
+			mockMessage("new-character Jonathan Mortal", mockDM),
+			mockMessage("new-character Nathaniel Solar", mockDM)
 		];
 	});
 
@@ -97,12 +107,25 @@ describe("fuzzy-matching", () => {
 
 describe("set-trait", () => {
 	beforeEach("create the new character", async () => {
-		await mockMessage("new-character Johnnie Mortal");
+		await mockMessage("new-character Johnnie Mortal", mockDM);
 	});
 
 	it("should have an Appearance of 5", async () => {
-		await mockMessage("set-trait Johnnie app 5");
+		await mockMessage("set-trait Johnnie app 5", mockDM);
 		const char = await db.getCharacter("Johnnie");
 		expect((<Character>JSON.parse(char.json)).attributes.appearance.value).to.equal(5);
+	});
+});
+
+describe("scene", () => {
+	beforeEach("create the scene", async () => {
+		await mockMessage("scene create 'Under the Sea'", mockChannel);
+	});
+
+	describe("create", () => {
+		it("should tell me it was successful", async () => {
+			expect(responses).to.have.lengthOf(1);
+			expect(responses[0]).to.equal(`Successfully created #1, "Under the Sea", in ${mockChannel.name}`);
+		});
 	});
 });
