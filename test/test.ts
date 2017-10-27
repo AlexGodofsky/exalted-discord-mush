@@ -12,7 +12,6 @@ use(chaiAsPromised);
 
 yargs.commandDir("../src/commands", { extensions: ["ts"] })
 	.recommendCommands();
-//yargs.commandDir('./commands');
 
 let db: Database;
 let responses: string[];
@@ -107,13 +106,3 @@ describe("set-trait", () => {
 		expect((<Character>JSON.parse(char.json)).attributes.appearance.value).to.equal(5);
 	});
 });
-
-
-//yargs.parse("new-character Amalthea Solar", { db: db });
-//yargs.parse("set-trait thea app 5", { db: db });
-//yargs.parse("set-trait thea cha 5", { db: db });
-//yargs.parse("set-trait thea man 5", { db: db });
-//yargs.parse("set-trait thea ath 5", { db: db });
-//yargs.parse("set-trait thea dod 5", { db: db });
-//yargs.parse("sheet 1", { db: db });
-//db.getCharacter("AMA").then(console.log);
