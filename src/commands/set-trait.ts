@@ -58,5 +58,5 @@ export async function setTrait(db: Database, message: Message, char_name: string
 		}
 	}
 
-	await db.updateCharacter(char.id, data);
+	await db.updateCharacter(char.id, data, char.version);
 }

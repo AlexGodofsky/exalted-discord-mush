@@ -17,7 +17,8 @@ export interface CharacterRecord {
 	created: number,
 	approved: number,
 	approver: string,
-	routed_to: string
+	routed_to: string,
+	version: number
 }
 
 export type SceneStatus = "running" | "complete";
@@ -66,24 +67,28 @@ export class Database {
 	async newCharacter(char: Character, owner: Snowflake): Promise<void> {
 		//TODO: like newScene make this return the new id
 		await this.db.run(
-			`INSERT INTO characters (owner, name, splat, json, status, created)
-			 VALUES ($owner, $name, $splat, $json, $status, $created)`, {
+			`INSERT INTO characters (owner, name, splat, json, status, created, version)
+			 VALUES ($owner, $name, $splat, $json, $status, $created, $version)`, {
 			$owner: owner,
 			$name: char.name,
 			$splat: char.splat,
 			$json: JSON.stringify(char),
 			$status: "new",
-			$created: moment().valueOf()
+			$created: moment().valueOf(),
+			$version: 0
 		});
 	}
 
-	async updateCharacter(id: number, char: Character): Promise<void> {
+	async updateCharacter(id: number, char: Character, version: number): Promise<void> {
+		//TODO: have this report optimistic locking failure as a thrown error rather than silent fail
 		await this.db.run(
-			`UPDATE characters SET name = $name, splat = $splat, json = $json WHERE id = $id`, {
+			`UPDATE characters SET name = $name, splat = $splat, json = $json, version = $version + 1
+			 WHERE id = $id AND version = $version`, {
 			$id: id,
 			$name: char.name,
 			$splat: char.splat,
-			$json: JSON.stringify(char)
+			$json: JSON.stringify(char),
+			$version: version
 		});
 	}
 
@@ -144,7 +149,7 @@ export async function startDB(clean: boolean): Promise<Database> {
 		sqlite.run(`CREATE TABLE IF NOT EXISTS characters
 					(id INTEGER PRIMARY KEY, owner TEXT, name TEXT UNIQUE, splat TEXT, json TEXT,
 						status TEXT, created INTEGER, submitted INTEGER, approved INTEGER, approver TEXT,
-						routed_to TEXT)`),
+						routed_to TEXT, version INTEGER)`),
 		sqlite.run(`CREATE TABLE IF NOT EXISTS xp_awards
 					(id INTEGER PRIMARY KEY, character INTEGER, amount INTEGER, type TEXT,
 						status TEXT, comment TEXT, created INTEGER, modified INTEGER, modifier TEXT,
