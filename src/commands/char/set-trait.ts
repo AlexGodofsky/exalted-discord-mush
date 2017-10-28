@@ -1,9 +1,9 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../message-handler";
-import { Message } from "../discord-mock";
-import { Database } from "../persistence";
-import { AbilityName, AttributeName, Character, Dots0to5 } from "../character";
+import { respond, respondDM } from "../../message-handler";
+import { Message } from "../../discord-mock";
+import { Database } from "../../persistence";
+import { AbilityName, AttributeName, Character, Dots0to5 } from "../../character";
 
 export const command = "set-trait <char_name> <trait_name> <value>";
 export const aliases: string[] = [];

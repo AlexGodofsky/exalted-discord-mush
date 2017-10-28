@@ -1,11 +1,11 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../message-handler";
-import { Message } from "../discord-mock";
-import { Database } from "../persistence";
-import { newCharacter as char_newCharacter, SplatName } from "../character";
+import { respond, respondDM } from "../../message-handler";
+import { Message } from "../../discord-mock";
+import { Database } from "../../persistence";
+import { newCharacter , SplatName } from "../../character";
 
-export const command = "new-character <name> <splat>";
+export const command = "new <name> <splat>";
 export const aliases: string[] = [];
 export const describe = "Create a new character";
 export const builder = (yargs: yargs.Argv) => {
@@ -21,7 +21,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await newCharacter(argv.db, argv.message, argv.name, argv.splat);
+		await newChar(argv.db, argv.message, argv.name, argv.splat);
 		argv.resolve();
 	} catch (error) {
 		await respondDM(argv.message, error);
@@ -29,10 +29,10 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function newCharacter(db: Database, message: Message, name: string, splat: SplatName) {
-	const char = char_newCharacter(name, splat);
+export async function newChar(db: Database, message: Message, name: string, splat: SplatName) {
+	const char = newCharacter(name, splat);
 	await db.newCharacter(char, message.author.id);
 	await respondDM(message, `Successfully created ${name}!`);
 }
 
-export default newCharacter;
+export default newChar;

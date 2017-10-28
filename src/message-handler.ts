@@ -27,6 +27,7 @@ export async function handleMessage(message: Message, db: Database, config: Mess
 			return;
 	}
 
+	//TODO: tests have indicated that if given an unrecognized command this hangs, figure out the issue
 	await new Promise((resolve, reject) => {
 		yargs.parse(raw_message, { db: db, message: message, resolve: resolve, reject: reject }, yargsParseFn);
 	});

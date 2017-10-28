@@ -7,7 +7,6 @@ import { Database, startDB } from "../src/persistence";
 import { handleMessage } from "../src/message-handler";
 import { Message, Channel, TextChannel, DMChannel } from "../src/discord-mock";
 import { Character } from "../src/character";
-import newCharacter from "../src/commands/new-character";
 
 use(chaiAsPromised);
 
@@ -61,32 +60,42 @@ beforeEach("clear responses", () => {
 	responses = [];
 });
 
-describe("new-character", () => {
+describe("char", () => {
 	beforeEach("create the new character", async () => {
-		await mockMessage("new-character Johnnie Mortal", mockDM);
+		await mockMessage("char new Johnnie Mortal", mockDM);
 	});
 
-	it("should tell me it was successful", async () => {
-		expect(responses).to.have.lengthOf(1);
-		expect(responses[0]).to.equal("Successfully created Johnnie!");
+	describe("new", () => {
+		it("should tell me it was successful", async () => {
+			expect(responses).to.have.lengthOf(1);
+			expect(responses[0]).to.equal("Successfully created Johnnie!");
+		});
+
+		it("should have id of 1", async () => {
+			const char = await db.getCharacter("Johnnie");
+			expect(char.id).to.equal(1);
+		});
+
+		it("should have a name of Johnnie", async () => {
+			const char = await db.getCharacter("Johnnie");
+			expect(char.name).to.equal("Johnnie");
+		});
 	});
 
-	it("should have id of 1", async () => {
-		const char = await db.getCharacter("Johnnie");
-		expect(char.id).to.equal(1);
-	});
-
-	it("should have a name of Johnnie", async () => {
-		const char = await db.getCharacter("Johnnie");
-		expect(char.name).to.equal("Johnnie");
+	describe("set-trait", () => {
+		it("should have an Appearance of 5", async () => {
+			await mockMessage("char set-trait Johnnie app 5", mockDM);
+			const char = await db.getCharacter("Johnnie");
+			expect((<Character>JSON.parse(char.json)).attributes.appearance.value).to.equal(5);
+		});
 	});
 });
 
 describe("fuzzy-matching", () => {
 	beforeEach("creating multiple characters", async () => {
 		await [
-			mockMessage("new-character Jonathan Mortal", mockDM),
-			mockMessage("new-character Nathaniel Solar", mockDM)
+			mockMessage("char new Jonathan Mortal", mockDM),
+			mockMessage("char new Nathaniel Solar", mockDM)
 		];
 	});
 
@@ -102,18 +111,6 @@ describe("fuzzy-matching", () => {
 
 	it("should find too many people for 'Nathan'", async () => {
 		expect(db.getCharacter("Nathan")).to.eventually.throw('multiple characters match "Nathan"');
-	});
-});
-
-describe("set-trait", () => {
-	beforeEach("create the new character", async () => {
-		await mockMessage("new-character Johnnie Mortal", mockDM);
-	});
-
-	it("should have an Appearance of 5", async () => {
-		await mockMessage("set-trait Johnnie app 5", mockDM);
-		const char = await db.getCharacter("Johnnie");
-		expect((<Character>JSON.parse(char.json)).attributes.appearance.value).to.equal(5);
 	});
 });
 
