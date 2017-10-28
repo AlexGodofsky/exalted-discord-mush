@@ -22,6 +22,16 @@ export interface CharacterRecord {
 
 export type SceneStatus = "running" | "complete";
 
+export interface SceneRecord {
+	id: number,
+	owner: Snowflake,
+	title: string,
+	location: Snowflake,
+	status: SceneStatus,
+	created: number,
+	completed: number
+}
+
 export class Database {
 	private db: sqlite3.Database;
 	private driver: Driver;
@@ -104,6 +114,13 @@ export class Database {
 		// 	$created: moment().valueOf()
 		// });
 		// return (await this.db.get(`SELECT last_insert_rowid() as id;`)).id;
+	}
+
+	async listScenes(status: SceneStatus): Promise<SceneRecord[]> {
+		return this.db.all<SceneRecord>(
+			`SELECT * FROM scenes WHERE status = $status`, {
+			$status: status
+		});
 	}
 }
 

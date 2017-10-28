@@ -47,7 +47,7 @@ async function mockMessage(content: string, channel: Channel): Promise<Message> 
 			createDM: async () => mockDM
 		},
 		content: content,
-		channel: mockChannel
+		channel: channel
 	};
 	await handleMessage(message, db, config);
 	return message;
@@ -127,5 +127,15 @@ describe("scene", () => {
 			expect(responses).to.have.lengthOf(1);
 			expect(responses[0]).to.equal(`Successfully created #1, "Under the Sea", in ${mockChannel.name}`);
 		});
+
+		it("should list 1 scene as running", async () => {
+			await mockMessage("scene list", mockDM);
+			expect(responses.pop()).to.equal(`Under the Sea, running in Teahouse`);
+		});
 	});
+
+	describe("rename", () => {});
+	describe("conclude", () => {});
+	describe("join/leave", () => {});
+	describe("pause/resume", () => {});
 });

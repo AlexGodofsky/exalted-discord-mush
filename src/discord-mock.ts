@@ -8,19 +8,20 @@ export interface Message {
 		createDM: () => Promise<DMChannel>;
 	};
 	content: string;
-	channel: TextChannel | DMChannel;
+	channel: Channel;
 }
 
-export interface Channel {
+export type Channel = TextChannel | DMChannel;
+
+export interface TextChannel {
 	id: string;
 	send: (content: string) => Promise<any>
-}
-
-export interface TextChannel extends Channel {
 	name: string;
 	type: "text";
 }
 
-export interface DMChannel extends Channel {
+export interface DMChannel {
+	id: string;
+	send: (content: string) => Promise<any>
 	type: "dm";
 }
