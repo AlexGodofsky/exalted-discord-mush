@@ -122,12 +122,12 @@ describe("scene", () => {
 	describe("create", () => {
 		it("should tell me it was successful", async () => {
 			expect(responses).to.have.lengthOf(1);
-			expect(responses[0]).to.equal(`Successfully created #1, "Under the Sea", in ${mockChannel.name}`);
+			expect(responses[0]).to.equal(`Successfully created #1, "Under the Sea", in <#${mockChannel.id}>`);
 		});
 
 		it("should list 1 scene as running", async () => {
 			await mockMessage("scene list", mockDM);
-			expect(responses.pop()).to.equal(`Under the Sea, running in Teahouse`);
+			expect(responses.pop()).to.equal(`Under the Sea, running in <#${mockChannel.id}>`);
 		});
 	});
 

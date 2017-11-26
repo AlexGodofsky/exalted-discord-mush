@@ -31,7 +31,7 @@ export async function list(db: Database, message: Message, status: SceneStatus) 
 	const scenes = await db.listScenes(status);
 	//TODO: system for resolving location [Snowflake] to channel name
 	const response = scenes.map(scene =>
-		`${scene.title}, ${scene.status + (sceneManager.isPaused(scene.id) ? " (paused)" : "")} in ${scene.location}`
+		`${scene.title}, ${scene.status + (sceneManager.isPaused(scene.id) ? " (paused)" : "")} in <#${scene.location}>`
 	).join("\n");
 	await respond(message, response);
 }

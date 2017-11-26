@@ -27,7 +27,7 @@ export async function handler(argv: yargs.Arguments) {
 export async function create(db: Database, message: Message, title: string) {
 	if (message.channel.type !== "text") throw Error(`You can only create a scene in one of the public channels.`);
 	const id = await sceneManager.create(db, title, message.author.id, message.channel.id);
-	await respond(message, `Successfully created #${id}, "${title}", in ${message.channel.name}`);
+	await respond(message, `Successfully created #${id}, "${title}", in <#${message.channel.id}>`);
 }
 
 export default create;
