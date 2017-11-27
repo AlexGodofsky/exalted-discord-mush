@@ -9,6 +9,7 @@ interface MessageConfig {
 	prefix: string;
 }
 
+/** This is the main event handler for the application. */
 export async function handleMessage(message: Message, db: Database, config: MessageConfig) {
 	if (message.author.bot) return;
 	if (config.prefix !== "" && message.content.indexOf(config.prefix) !== 0) return;
@@ -33,10 +34,12 @@ export async function handleMessage(message: Message, db: Database, config: Mess
 	});
 }
 
+/** Response to a message in the same channel from which it was sent. */
 export async function respond(message: Message, response: string | Error) {
 	return message.channel.send(typeof response === "string" ? response : response.message);
 }
 
+/** Responds to a message via a DM to the author, even if the command was sent in a different channel. */
 export async function respondDM(message: Message, response: string | Error) {
 	return (await message.author.createDM()).send(typeof response === "string" ? response : response.message);
 }
