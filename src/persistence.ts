@@ -17,8 +17,8 @@ export interface CharacterRecord {
 	status: CharacterStatus,
 	created: number,
 	approved: number,
-	approver: string,
-	routed_to: string,
+	approver: Snowflake,
+	routed_to: Snowflake,
 	version: number
 }
 
