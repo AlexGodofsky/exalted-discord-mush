@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import * as sqlite3 from "sqlite";
 import { Database as Driver } from "sqlite3";
 import * as moment from "moment";
@@ -145,31 +146,11 @@ export async function startDB(clean: boolean): Promise<Database> {
 		sqlite.run(`DROP TABLE IF EXISTS scene_lines`)
 	]);
 
-	await Promise.all([
-		sqlite.run(`CREATE TABLE IF NOT EXISTS characters
-					(id INTEGER PRIMARY KEY, owner TEXT, name TEXT UNIQUE, splat TEXT, json TEXT,
-						status TEXT, created INTEGER, submitted INTEGER, approved INTEGER, approver TEXT,
-						routed_to TEXT, version INTEGER)`),
-		sqlite.run(`CREATE TABLE IF NOT EXISTS xp_awards
-					(id INTEGER PRIMARY KEY, character INTEGER, amount INTEGER, type TEXT,
-						status TEXT, comment TEXT, created INTEGER, modified INTEGER, modifier TEXT,
-						routed_to TEXT,
-					FOREIGN KEY(character) REFERENCES characters(id))`),
-		sqlite.run(`CREATE TABLE IF NOT EXISTS xp_spends
-					(id INTEGER PRIMARY KEY, character INTEGER, amount INTEGER, type TEXT,
-						trait TEXT, trait_type TEXT, old_trait_value INTEGER, new_trait_value INTEGER,
-						status TEXT, comment TEXT, created INTEGER, modified INTEGER, modifier TEXT,
-						routed_to TEXT,
-					FOREIGN KEY(character) REFERENCES characters(id))`),
-		sqlite.run(`CREATE TABLE IF NOT EXISTS scenes
-					(id INTEGER PRIMARY KEY, owner TEXT, title TEXT, location TEXT, status TEXT,
-						created INTEGER, completed INTEGER)`),
-		sqlite.run(`CREATE TABLE IF NOT EXISTS scene_lines
-					(id INTEGER PRIMARY KEY, scene INTEGER, character INTEGER, message TEXT, type TEXT,
-						text TEXT, date INTEGER, hide INTEGER,
-					FOREIGN KEY(scene) REFERENCES scenes(id),
-					FOREIGN KEY(character) REFERENCES characters(id))`)
-	]);
+	const schema: string = readFileSync("src/schema.sql", { encoding: "utf8" });
+	for (let s of schema.split(";")) {
+		s = s.trim();
+		if (s !== "") await sqlite.run(s);
+	}
 
 	await sqlite.run(`PRAGMA foreign_keys = true`);
 
