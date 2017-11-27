@@ -2,7 +2,9 @@ To add new commands create a new file in src/commands. See [yargs docs](https://
 
 Basic setup:
 
-```git clone https://github.com/AlexGodofsky/exalted-discord-mush.git
+```
+git clone https://github.com/AlexGodofsky/exalted-discord-mush.git
 cd exalted-discord-mush
 npm install
-npm test```
+npm test
+```
