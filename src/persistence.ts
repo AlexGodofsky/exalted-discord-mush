@@ -43,6 +43,10 @@ export class Database {
 		this.driver = (<any>db).driver;
 	}
 
+	/**
+	 * Retrieve a character record. If passed a number or number-y string, queries by id, otherwise does fuzzy matching by name.
+	 * @param identifier The database id (as number or string), or a name substring to fuzzy match.
+	 */
 	async getCharacter(identifier: number | string): Promise<CharacterRecord> {
 		if (typeof identifier === "number" || /\d+/.test(identifier)) {
 			const id = Number(identifier);
@@ -65,6 +69,11 @@ export class Database {
 		}
 	}
 
+	/**
+	 * Creates a new character record.
+	 * @param char The new Character data.
+	 * @param owner The Discord id of the owner.
+	 */
 	async newCharacter(char: Character, owner: Snowflake): Promise<void> {
 		//TODO: like newScene make this return the new id
 		await this.db.run(
@@ -80,6 +89,12 @@ export class Database {
 		});
 	}
 
+	/**
+	 * Updates the character sheet data.
+	 * @param id The character id.
+	 * @param char The updated Character object.
+	 * @param version The (non-incremented) version number of the record.
+	 */
 	async updateCharacter(id: number, char: Character, version: number): Promise<void> {
 		//TODO: have this report optimistic locking failure as a thrown error rather than silent fail
 		await this.db.run(
@@ -93,6 +108,12 @@ export class Database {
 		});
 	}
 
+	/**
+	 * Creates a new scene record.
+	 * @param title The scene's name.
+	 * @param owner The Discord id of the creator.
+	 * @param location The Discord id of the channel it is created in.
+	 */
 	async newScene(title: string, owner: Snowflake, location: Snowflake): Promise<number> {
 		//TODO: stress test this to make sure the serialization guarantee actually works
 		return new Promise<number>((resolve, reject) => {
@@ -122,14 +143,26 @@ export class Database {
 		// return (await this.db.get(`SELECT last_insert_rowid() as id;`)).id;
 	}
 
-	async listScenes(status: SceneStatus): Promise<SceneRecord[]> {
-		return this.db.all<SceneRecord>(
-			`SELECT * FROM scenes WHERE status = $status`, {
-			$status: status
-		});
+	/**
+	 * Return a list of all scenes optionally matching status.
+	 * @param status If present, return only scenes with this status.
+	 */
+	async listScenes(status?: SceneStatus): Promise<SceneRecord[]> {
+		if (status === undefined) {
+			return this.db.all<SceneRecord>(`SELECT * FROM scenes`);
+		} else {
+			return this.db.all<SceneRecord>(
+				`SELECT * FROM scenes WHERE status = $status`, {
+				$status: status
+			});
+		}
 	}
 }
 
+/**
+ * Start the DB, set up the table schemas, and return it.
+ * @param clean If true, create the DB from scratch.
+ */
 export async function startDB(clean: boolean): Promise<Database> {
 	const sqlite = await sqlite3.open("./data.sqlite");
 
