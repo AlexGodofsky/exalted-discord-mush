@@ -143,6 +143,17 @@ export class Database {
 		// return (await this.db.get(`SELECT last_insert_rowid() as id;`)).id;
 	}
 
+	/** Retrieve a scene record. */
+	async getScene(id: number): Promise<SceneRecord> {
+		const result = await this.db.get<SceneRecord | undefined>(
+			`SELECT * FROM scenes WHERE id = $id`, {
+			$id: id
+		});
+		
+		if (result === undefined) throw new Error(`scene ${id} not found`);
+		return result;
+	}
+
 	/**
 	 * Return a list of all scenes optionally matching status.
 	 * @param status If present, return only scenes with this status.

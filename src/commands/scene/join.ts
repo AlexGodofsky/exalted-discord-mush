@@ -3,6 +3,7 @@ import * as yargs from "yargs";
 import { respond, respondDM } from "../../message-handler";
 import { Message } from "../../discord-mock"
 import { Database } from "../../persistence";
+import { sceneManager } from "../../scene-manager";
 
 export const command = "join <scene_id> <char_name>";
 export const aliases: string[] = [];
@@ -27,7 +28,10 @@ export async function handler(argv: yargs.Arguments) {
 };
 
 export async function join(db: Database, message: Message, scene_id: number, char_name: string) {
-	throw Error("unimplemented");
+	if (message.channel.type !== "text") throw Error(`Scenes can only exist in one of the public channels.`);
+	const char = await db.getCharacter(char_name);
+	await sceneManager.join(scene_id, char);
+	await respond(message, `${char.name} joined scene ${scene_id}.`);
 }
 
 export default join;
