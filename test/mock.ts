@@ -81,12 +81,13 @@ export const player = new MockUser("player");
 const setRoles = (user: User, roles: Role[]): [Snowflake, GuildMember] => [user.id, new MockGuildMember(user, roles)];
 
 const adminRole: Role = { name: roleNames.admin };
+const placeholderRole: Role = { name: "placeholder" };
 
 export const guild: Guild = {
 	members: new Collection<Snowflake, GuildMember>([
 		setRoles(admin, [adminRole]),
-		setRoles(storyteller, []),
-		setRoles(player, [])
+		setRoles(storyteller, [placeholderRole]),
+		setRoles(player, [placeholderRole])
 	])
 };
 

@@ -8,7 +8,7 @@ import { handleMessage } from "../src/message-handler";
 import { Message, Channel, TextChannel, DMChannel, User, Guild, Role } from "../src/discord-mock";
 import { Character } from "../src/character";
 
-import { teahouse, battlefield, admin, storyteller, player, reset as resetChannels } from "./mock";
+import { teahouse, battlefield, admin, storyteller, player, reset as resetChannels, guild } from "./mock";
 
 use(chaiAsPromised);
 
@@ -28,7 +28,7 @@ async function send(content: string, user: User, channel: Channel): Promise<Mess
 		content: content,
 		channel: channel
 	};
-	await handleMessage(message, { db: db, guild: <any>null }, config);
+	await handleMessage(message, { db: db, guild: guild }, config);
 	return message;
 }
 
