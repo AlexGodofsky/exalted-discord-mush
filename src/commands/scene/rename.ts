@@ -1,8 +1,7 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../../message-handler";
+import { Context, respond, respondDM } from "../../message-handler";
 import { Message } from "../../discord-mock"
-import { Database } from "../../persistence";
 
 export const command = "rename <scene_id> <title>";
 export const aliases: string[] = [];
@@ -18,7 +17,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await rename(argv.db, argv.message, argv.scene_id, argv.new_title);
+		await rename(argv.context, argv.message, argv.scene_id, argv.new_title);
 		argv.resolve();
 	} catch (error) {
 		await respond(argv.message, error);
@@ -26,7 +25,7 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function rename(db: Database, message: Message, scene_id: number, new_title: string) {
+export async function rename(context: Context, message: Message, scene_id: number, new_title: string) {
 	throw Error("unimplemented");
 }
 

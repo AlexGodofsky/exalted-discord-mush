@@ -1,8 +1,7 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../../message-handler";
-import { Message } from "../../discord-mock"
-import { Database } from "../../persistence";
+import { Context, respond, respondDM } from "../../message-handler";
+import { Message } from "../../discord-mock";
 
 export const command = "resume <scene_id>";
 export const aliases: string[] = [];
@@ -15,7 +14,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await resume(argv.db, argv.message, argv.scene_id);
+		await resume(argv.context, argv.message, argv.scene_id);
 		argv.resolve();
 	} catch (error) {
 		await respond(argv.message, error);
@@ -23,7 +22,7 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function resume(db: Database, message: Message, scene_id: number) {
+export async function resume(context: Context, message: Message, scene_id: number) {
 	throw Error("unimplemented");
 }
 

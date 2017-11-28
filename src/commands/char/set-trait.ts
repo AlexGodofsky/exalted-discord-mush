@@ -1,8 +1,7 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../../message-handler";
+import { Context, respond, respondDM } from "../../message-handler";
 import { Message } from "../../discord-mock";
-import { Database } from "../../persistence";
 import { AbilityName, AttributeName, Character, Dots0to5 } from "../../character";
 
 export const command = "set-trait <char_name> <trait_name> <value>";
@@ -24,7 +23,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await setTrait(argv.db, argv.message, argv.char_name, argv.trait_name, argv.value);
+		await setTrait(argv.context, argv.message, argv.char_name, argv.trait_name, argv.value);
 		argv.resolve();
 	} catch (error) {
 		await respondDM(argv.message, error);
@@ -32,8 +31,8 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function setTrait(db: Database, message: Message, char_name: string, trait_name: string, value: Dots0to5) {
-	const char = await db.getCharacter(char_name);
+export async function setTrait(context: Context, message: Message, char_name: string, trait_name: string, value: Dots0to5) {
+	const char = await context.db.getCharacter(char_name);
 	const data: Character = JSON.parse(char.json);
 
 	let matched = false;
@@ -58,5 +57,5 @@ export async function setTrait(db: Database, message: Message, char_name: string
 		}
 	}
 
-	await db.updateCharacter(char.id, data, char.version);
+	await context.db.updateCharacter(char.id, data, char.version);
 }

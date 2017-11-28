@@ -1,6 +1,6 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../message-handler";
+import { Context, respond, respondDM } from "../message-handler";
 import { Message } from "../discord-mock";
 import { Database } from "../persistence";
 import { AbilityName, AttributeName, Character } from "../character";
@@ -16,7 +16,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await sheet(argv.db, argv.message, argv.name);
+		await sheet(argv.context, argv.message, argv.name);
 		argv.resolve();
 	} catch (error) {
 		await respondDM(argv.message, error);
@@ -24,8 +24,8 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function sheet(db: Database, message: Message, name: string) {
-	const char = await db.getCharacter(name);
+export async function sheet(context: Context, message: Message, name: string) {
+	const char = await context.db.getCharacter(name);
 	const data: Character = JSON.parse(char.json);
 	
 	const str = `${data.name}, ${data.splat}

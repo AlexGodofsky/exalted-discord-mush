@@ -28,7 +28,7 @@ async function send(content: string, user: User, channel: Channel): Promise<Mess
 		content: content,
 		channel: channel
 	};
-	await handleMessage(message, db, config);
+	await handleMessage(message, { db: db, guild: <any>null }, config);
 	return message;
 }
 

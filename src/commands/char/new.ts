@@ -1,8 +1,7 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../../message-handler";
+import { Context, respond, respondDM } from "../../message-handler";
 import { Message } from "../../discord-mock";
-import { Database } from "../../persistence";
 import { newCharacter , SplatName } from "../../character";
 
 export const command = "new <name> <splat>";
@@ -21,7 +20,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await newChar(argv.db, argv.message, argv.name, argv.splat);
+		await newChar(argv.context, argv.message, argv.name, argv.splat);
 		argv.resolve();
 	} catch (error) {
 		await respondDM(argv.message, error);
@@ -29,9 +28,9 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function newChar(db: Database, message: Message, name: string, splat: SplatName) {
+export async function newChar(context: Context, message: Message, name: string, splat: SplatName) {
 	const char = newCharacter(name, splat);
-	await db.newCharacter(char, message.author.id);
+	await context.db.newCharacter(char, message.author.id);
 	await respondDM(message, `Successfully created ${name}!`);
 }
 

@@ -4,7 +4,7 @@ import * as yargs from "yargs";
 import { Database } from "./persistence";
 import { Message, Guild } from "./discord-mock";
 
-interface Context {
+export interface Context {
 	readonly db: Database,
 	readonly guild: Guild
 }
@@ -15,7 +15,7 @@ interface MessageConfig {
 }
 
 /** This is the main event handler for the application. */
-export async function handleMessage(message: Message, db: Database, config: MessageConfig) {
+export async function handleMessage(message: Message, context: Context, config: MessageConfig) {
 	if (message.author.bot) return;
 	if (config.prefix !== "" && message.content.indexOf(config.prefix) !== 0) return;
 
@@ -35,7 +35,7 @@ export async function handleMessage(message: Message, db: Database, config: Mess
 
 	//TODO: tests have indicated that if given an unrecognized command this hangs, figure out the issue
 	await new Promise((resolve, reject) => {
-		yargs.parse(raw_message, { db: db, message: message, resolve: resolve, reject: reject }, yargsParseFn);
+		yargs.parse(raw_message, { context: context, message: message, resolve: resolve, reject: reject }, yargsParseFn);
 	});
 }
 

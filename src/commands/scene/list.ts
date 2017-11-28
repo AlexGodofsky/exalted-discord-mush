@@ -1,8 +1,8 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../../message-handler";
-import { Message } from "../../discord-mock"
-import { Database, SceneStatus } from "../../persistence";
+import { Context, respond, respondDM } from "../../message-handler";
+import { Message } from "../../discord-mock";
+import { SceneStatus } from "../../persistence";
 import sceneManager from "../../scene-manager";
 
 export const command = "list [status]";
@@ -18,7 +18,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await list(argv.db, argv.message, argv.status);
+		await list(argv.context, argv.message, argv.status);
 		argv.resolve();
 	} catch (error) {
 		await respond(argv.message, error);
@@ -26,9 +26,9 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function list(db: Database, message: Message, status: SceneStatus) {
+export async function list(context: Context, message: Message, status: SceneStatus) {
 	if (message.channel.type !== "dm") throw Error(`Please keep reporting commands in DMs.`);
-	const scenes = await db.listScenes(status);
+	const scenes = await context.db.listScenes(status);
 	//TODO: system for resolving location [Snowflake] to channel name
 	const response = scenes.map(scene =>
 		`${scene.title}, ${scene.status + (sceneManager.isPaused(scene.id) ? " (paused)" : "")} in <#${scene.location}>`

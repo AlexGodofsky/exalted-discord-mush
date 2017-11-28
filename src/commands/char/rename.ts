@@ -1,8 +1,7 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../../message-handler";
+import { Context, respond, respondDM } from "../../message-handler";
 import { Message } from "../../discord-mock";
-import { Database } from "../../persistence";
 import { Character } from "../../character";
 
 export const command = "set-trait <char_name> <new_name>";
@@ -20,7 +19,7 @@ export const builder = (yargs: yargs.Argv) => {
 };
 export async function handler(argv: yargs.Arguments) {
 	try {
-		await rename(argv.db, argv.message, argv.char_name, argv.new_name);
+		await rename(argv.context, argv.message, argv.char_name, argv.new_name);
 		argv.resolve();
 	} catch (error) {
 		await respondDM(argv.message, error);
@@ -28,9 +27,9 @@ export async function handler(argv: yargs.Arguments) {
 	}
 };
 
-export async function rename(db: Database, message: Message, char_name: string, new_name: string) {
-	const char = await db.getCharacter(char_name);
+export async function rename(context: Context, message: Message, char_name: string, new_name: string) {
+	const char = await context.db.getCharacter(char_name);
 	const data: Character = JSON.parse(char.json);
 	data.name = new_name;
-	await db.updateCharacter(char.id, data, char.version);
+	await context.db.updateCharacter(char.id, data, char.version);
 }
