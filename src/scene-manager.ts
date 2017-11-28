@@ -22,7 +22,8 @@ class SceneManager {
 		this.scenes = new Map();
 		this.rooms = new Map();
 
-		setInterval(this.pauseInactive, inactiveTestInterval);
+		//TODO: don't run this during unit testing
+		// setInterval(this.pauseInactive.bind(this), inactiveTestInterval);
 	}
 
 	async create(db: Database, title: string, owner: Snowflake, location: Snowflake): Promise<number> {
@@ -31,7 +32,7 @@ class SceneManager {
 
 		const scene = {
 			record: record,
-			paused: true,
+			paused: this.rooms.has(location),
 			joined: [],
 			lastActive: moment()
 		};
@@ -63,7 +64,7 @@ class SceneManager {
 		const scene = this.getScene(scene_id);
 
 		//TODO: export this logic to... somewhere... in the form of a requireApproved(char) function
-		if (char.status === "approved") throw new Error(`${char.name} has not yet been approved.`);
+		if (char.status !== "approved") throw new Error(`${char.name} has not yet been approved.`);
 
 		scene.joined.push(char.id);
 		scene.lastActive = moment();
@@ -73,7 +74,7 @@ class SceneManager {
 		const scene = this.getScene(scene_id);
 
 		const index = scene.joined.indexOf(char.id);
-		if (index === -1) throw new Error(`${char.name} was not currently participating in "${scene.record.title}".`);
+		if (index === -1) throw new Error(`${char.name} is not currently participating in "${scene.record.title}".`);
 
 		scene.joined.splice(index, 1);
 		scene.lastActive = moment();

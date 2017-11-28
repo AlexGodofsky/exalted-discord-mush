@@ -3,7 +3,7 @@ import * as yargs from "yargs";
 import { respond, respondDM } from "../../message-handler";
 import { Message } from "../../discord-mock"
 import { Database } from "../../persistence";
-import { sceneManager } from "../../scene-manager";
+import sceneManager from "../../scene-manager";
 
 export const command = "join <scene_id> <char_name>";
 export const aliases: string[] = [];

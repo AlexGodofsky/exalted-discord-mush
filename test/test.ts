@@ -121,8 +121,7 @@ describe("scene", () => {
 
 	describe("create", () => {
 		it("should tell me it was successful", async () => {
-			expect(responses).to.have.lengthOf(1);
-			expect(responses[0]).to.equal(`Successfully created #1, "Under the Sea", in <#${mockChannel.id}>`);
+			expect(responses.pop()).to.equal(`Successfully created #1, "Under the Sea", in <#${mockChannel.id}>`);
 		});
 
 		it("should list 1 scene as running", async () => {
@@ -133,6 +132,29 @@ describe("scene", () => {
 
 	describe("rename", () => {});
 	describe("conclude", () => {});
-	describe("join/leave", () => {});
+
+	describe("join/leave", () => {
+		beforeEach("create characters", async () => {
+			await mockMessage("char new Johnnie Mortal", mockDM);
+			//await mockMessage("char approve Johnnie", mockDM)
+		});
+
+		it("should tell me that I joined", async () => {
+			await mockMessage("scene join 1 Johnnie", mockChannel);
+			expect(responses.pop()).to.equal(`Johnnie joined scene 1.`);
+		});
+
+		it("should tell me that I left", async () => {
+			await mockMessage("scene join 1 Johnnie", mockChannel);
+			await mockMessage("scene leave 1 Johnnie", mockChannel);
+			expect(responses.pop()).to.equal(`Johnnie left scene 1.`);
+		});
+
+		it("should not let unapproved characters join", async () => {
+			await mockMessage("char new Bobbie Solar", mockDM);
+			expect(mockMessage("scene join 1 Bobbie", mockChannel)).to.eventually.throw("Bobbie has not yet been approved.");
+		});
+	});
+
 	describe("pause/resume", () => {});
 });
