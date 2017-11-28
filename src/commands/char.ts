@@ -1,8 +1,5 @@
 import * as yargs from "yargs";
 
-import { respond, respondDM } from "../message-handler";
-import { Message } from "../discord-mock";
-
 export const command = "char <command>";
 export const aliases: string[] = [];
 export const describe = "Create and manage characters";
