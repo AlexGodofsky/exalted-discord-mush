@@ -16,37 +16,14 @@ yargs.commandDir("../src/commands", { extensions: ["ts"] })
 	.recommendCommands();
 
 let db: Database;
-// let responses: string[];
 
 //TODO: move to separate test config file
 const config = {
 	prefix: "" // later this will probably need to be something, as we may want the logger to read un-prefixed messages
 };
 
-// async function mockResponse(content: string) {
-// 	responses.push(content);
-// }
-
-// const teahouse: TextChannel = {
-// 	id: "public",
-// 	send: mockResponse,
-// 	name: "Teahouse",
-// 	type: "text"
-// };
-
-// const dm: DMChannel = {
-// 	id: "private",
-// 	send: mockResponse,
-// 	type: "dm"
-// }
-
 async function send(content: string, user: User, channel: Channel): Promise<Message> {
 	const message = {
-		// author: {
-		// 	bot: false,
-		// 	id: "test",
-		// 	createDM: async () => dm
-		// },
 		author: user,
 		content: content,
 		channel: channel

@@ -21,7 +21,7 @@ export interface TextChannel {
 export interface DMChannel {
 	id: Snowflake;
 	send: (content: string) => Promise<any>;
-	type: "dm";
+	type: "dm" | "group" | "text" | "voice";
 }
 
 export interface User {

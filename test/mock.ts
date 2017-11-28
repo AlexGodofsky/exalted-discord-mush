@@ -1,11 +1,12 @@
-// import { Database, startDB } from "../src/persistence";
+import { Collection, Snowflake } from "discord.js";
+
 import { handleMessage } from "../src/message-handler";
-import { Message, Channel, TextChannel, DMChannel, User, Guild, Role } from "../src/discord-mock";
-// import { Message, Channel, TextChannel, DMChannel, User, Guild, Role } from "discord.js";
+import { Message, Channel, TextChannel, DMChannel, User, Guild, GuildMember, Role } from "../src/discord-mock";
+import { roleNames } from "../src/permissions";
 
 class MockUser implements User {
 	bot: false;
-	id: string;
+	id: Snowflake;
 	dmChannel: MockDMChannel;
 
 	constructor(name: string) {
@@ -18,8 +19,20 @@ class MockUser implements User {
 	}
 }
 
+class MockGuildMember implements GuildMember {
+	id: Snowflake;
+	roles: Collection<Snowflake, Role>;
+	user: User;
+
+	constructor(user: User, roles: Role[]) {
+		this.id = user.id;
+		this.roles = new Collection(roles.map<[Snowflake, Role]>(role => [role.name, role]));
+		this.user = user;
+	}
+}
+
 class MockTextChannel implements TextChannel {
-	id: string;
+	id: Snowflake;
 	name: string;
 	type: "text";
 	responses: string[];
@@ -40,7 +53,7 @@ class MockTextChannel implements TextChannel {
 }
 
 class MockDMChannel implements DMChannel {
-	id: string;
+	id: Snowflake;
 	type: "dm";
 	responses: string[];
 
@@ -64,6 +77,18 @@ export const battlefield = new MockTextChannel("public2", "Battlefield");
 export const admin = new MockUser("admin");
 export const storyteller = new MockUser("storyteller");
 export const player = new MockUser("player");
+
+const setRoles = (user: User, roles: Role[]): [Snowflake, GuildMember] => [user.id, new MockGuildMember(user, roles)];
+
+const adminRole: Role = { name: roleNames.admin };
+
+export const guild: Guild = {
+	members: new Collection<Snowflake, GuildMember>([
+		setRoles(admin, [adminRole]),
+		setRoles(storyteller, []),
+		setRoles(player, [])
+	])
+};
 
 export function reset() {
 	teahouse.reset();

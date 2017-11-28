@@ -2,7 +2,12 @@
 import * as yargs from "yargs";
 
 import { Database } from "./persistence";
-import { Message } from "./discord-mock";
+import { Message, Guild } from "./discord-mock";
+
+interface Context {
+	readonly db: Database,
+	readonly guild: Guild
+}
 
 // just the options necessary for message-handler
 interface MessageConfig {

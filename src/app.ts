@@ -9,8 +9,8 @@ interface Config {
 	prefix: string;
 }
 
-export const config: Config = require("../config.json");
-export let db: Database;
+const config: Config = require("../config.json");
+let db: Database;
 
 async function start() {
 	db = await startDB(false);
@@ -34,7 +34,9 @@ async function start() {
 		console.log(`discord guildDelete ${guild.name} (id: ${guild.id})`);
 	});
 	
-	client.on("message", handleMessage);
+	client.on("message", async message => {
+		handleMessage(message, db, config);
+	});
 
 	client.login(config.token);
 }
