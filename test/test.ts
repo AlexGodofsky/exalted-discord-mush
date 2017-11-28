@@ -5,8 +5,10 @@ import * as yargs from "yargs";
 
 import { Database, startDB } from "../src/persistence";
 import { handleMessage } from "../src/message-handler";
-import { Message, Channel, TextChannel, DMChannel } from "../src/discord-mock";
+import { Message, Channel, TextChannel, DMChannel, User, Guild, Role } from "../src/discord-mock";
 import { Character } from "../src/character";
+
+import { teahouse, battlefield, admin, storyteller, player, reset as resetChannels } from "./mock";
 
 use(chaiAsPromised);
 
@@ -14,37 +16,38 @@ yargs.commandDir("../src/commands", { extensions: ["ts"] })
 	.recommendCommands();
 
 let db: Database;
-let responses: string[];
+// let responses: string[];
 
 //TODO: move to separate test config file
 const config = {
 	prefix: "" // later this will probably need to be something, as we may want the logger to read un-prefixed messages
 };
 
-async function mockResponse(content: string) {
-	responses.push(content);
-}
+// async function mockResponse(content: string) {
+// 	responses.push(content);
+// }
 
-const mockChannel: TextChannel = {
-	id: "public",
-	send: mockResponse,
-	name: "Teahouse",
-	type: "text"
-};
+// const teahouse: TextChannel = {
+// 	id: "public",
+// 	send: mockResponse,
+// 	name: "Teahouse",
+// 	type: "text"
+// };
 
-const mockDM: DMChannel = {
-	id: "private",
-	send: mockResponse,
-	type: "dm"
-}
+// const dm: DMChannel = {
+// 	id: "private",
+// 	send: mockResponse,
+// 	type: "dm"
+// }
 
-async function mockMessage(content: string, channel: Channel): Promise<Message> {
+async function send(content: string, user: User, channel: Channel): Promise<Message> {
 	const message = {
-		author: {
-			bot: false,
-			id: "test",
-			createDM: async () => mockDM
-		},
+		// author: {
+		// 	bot: false,
+		// 	id: "test",
+		// 	createDM: async () => dm
+		// },
+		author: user,
 		content: content,
 		channel: channel
 	};
@@ -56,19 +59,17 @@ beforeEach("start clean database", async () => {
 	db = await startDB(true);
 });
 
-beforeEach("clear responses", () => {
-	responses = [];
-});
+beforeEach("clear responses", resetChannels);
 
 describe("char", () => {
 	beforeEach("create the new character", async () => {
-		await mockMessage("char new Johnnie Mortal", mockDM);
+		await send("char new Johnnie Mortal", player, player.dmChannel);
 	});
 
 	describe("new", () => {
 		it("should tell me it was successful", async () => {
-			expect(responses).to.have.lengthOf(1);
-			expect(responses[0]).to.equal("Successfully created Johnnie!");
+			expect(player.dmChannel.responses).to.have.lengthOf(1);
+			expect(player.dmChannel.responses[0]).to.equal("Successfully created Johnnie!");
 		});
 
 		it("should have id of 1", async () => {
@@ -84,7 +85,7 @@ describe("char", () => {
 
 	describe("set-trait", () => {
 		it("should have an Appearance of 5", async () => {
-			await mockMessage("char set-trait Johnnie app 5", mockDM);
+			await send("char set-trait Johnnie app 5", player, player.dmChannel);
 			const char = await db.getCharacter("Johnnie");
 			expect((<Character>JSON.parse(char.json)).attributes.appearance.value).to.equal(5);
 		});
@@ -94,8 +95,8 @@ describe("char", () => {
 describe("fuzzy-matching", () => {
 	beforeEach("creating multiple characters", async () => {
 		await [
-			mockMessage("char new Jonathan Mortal", mockDM),
-			mockMessage("char new Nathaniel Solar", mockDM)
+			send("char new Jonathan Mortal", player, player.dmChannel),
+			send("char new Nathaniel Solar", player, player.dmChannel)
 		];
 	});
 
@@ -116,17 +117,17 @@ describe("fuzzy-matching", () => {
 
 describe("scene", () => {
 	beforeEach("create the scene", async () => {
-		await mockMessage("scene create 'Under the Sea'", mockChannel);
+		await send("scene create 'Under the Sea'", storyteller, teahouse);
 	});
 
 	describe("create", () => {
 		it("should tell me it was successful", async () => {
-			expect(responses.pop()).to.equal(`Successfully created #1, "Under the Sea", in <#${mockChannel.id}>`);
+			expect(teahouse.responses.pop()).to.equal(`Successfully created #1, "Under the Sea", in <#${teahouse.id}>`);
 		});
 
 		it("should list 1 scene as running", async () => {
-			await mockMessage("scene list", mockDM);
-			expect(responses.pop()).to.equal(`Under the Sea, running in <#${mockChannel.id}>`);
+			await send("scene list", player, player.dmChannel);
+			expect(player.dmChannel.responses.pop()).to.equal(`Under the Sea, running in <#${teahouse.id}>`);
 		});
 	});
 
@@ -135,24 +136,24 @@ describe("scene", () => {
 
 	describe("join/leave", () => {
 		beforeEach("create characters", async () => {
-			await mockMessage("char new Johnnie Mortal", mockDM);
-			//await mockMessage("char approve Johnnie", mockDM)
+			await send("char new Johnnie Mortal", player, player.dmChannel);
+			//await send("char approve Johnnie", admin, admin.dmChannel);
 		});
 
 		it("should tell me that I joined", async () => {
-			await mockMessage("scene join 1 Johnnie", mockChannel);
-			expect(responses.pop()).to.equal(`Johnnie joined scene 1.`);
+			await send("scene join 1 Johnnie", player, teahouse);
+			expect(teahouse.responses.pop()).to.equal(`Johnnie joined scene 1.`);
 		});
 
 		it("should tell me that I left", async () => {
-			await mockMessage("scene join 1 Johnnie", mockChannel);
-			await mockMessage("scene leave 1 Johnnie", mockChannel);
-			expect(responses.pop()).to.equal(`Johnnie left scene 1.`);
+			await send("scene join 1 Johnnie", player, teahouse);
+			await send("scene leave 1 Johnnie", player, teahouse);
+			expect(teahouse.responses.pop()).to.equal(`Johnnie left scene 1.`);
 		});
 
 		it("should not let unapproved characters join", async () => {
-			await mockMessage("char new Bobbie Solar", mockDM);
-			expect(mockMessage("scene join 1 Bobbie", mockChannel)).to.eventually.throw("Bobbie has not yet been approved.");
+			await send("char new Bobbie Solar", player, player.dmChannel);
+			expect(send("scene join 1 Bobbie", player, teahouse)).to.eventually.throw("Bobbie has not yet been approved.");
 		});
 	});
 
