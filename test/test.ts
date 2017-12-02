@@ -89,6 +89,16 @@ describe("char", () => {
 		});
 	});
 
+	describe("approve", () => {
+		it("status should be approved, approver should be admin.id", async () => {
+			await send("char submit Johnnie", player, player.dmChannel);
+			await send("char approve Johnnie", admin, admin.dmChannel);
+			const char = await db.getCharacter("Johnnie");
+			expect(char.status).to.equal("approved");
+			expect(char.approver).to.equal(admin.id);
+		});
+	});
+
 });
 
 describe("fuzzy-matching", () => {

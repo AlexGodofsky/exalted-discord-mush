@@ -186,7 +186,21 @@ export class Database {
                 $owner: owner
             }
         );
-    }
+	}
+	
+	async approveCharacter(name: string, id: Snowflake, time: number): Promise<void>{
+		await this.db.run(
+            `UPDATE characters SET status = $status, approver = $approver, approved = $approved
+			WHERE name = $name`, {
+		   
+				$status: "approved",
+				$approver: id,
+				$approved: time,
+				$name: name
+			}
+		);
+	}
+	
 
 }
 
