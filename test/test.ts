@@ -67,6 +67,38 @@ describe("char", () => {
 			expect((<Character>JSON.parse(char.json)).attributes.appearance.value).to.equal(5);
 		});
 	});
+
+	describe("submit", () => {
+		it("status should be submitted", async () => {
+			await send("char submit Johnnie", player, player.dmChannel);
+			const char = await db.getCharacter("Johnnie");
+			expect(char.status).to.equal("submitted");
+		});
+	});
+
+	describe("list-submitted", () => {
+		it("should be 2 submitted characters", async () => {
+			await send("char submit Johnnie", player, player.dmChannel);
+			await send ("char new Billy Mortal", player, player.dmChannel);
+			await send("char submit Billy", player, player.dmChannel);
+			await send("char list-submitted", player, player.dmChannel);
+			const char = await db.listSubmitted(player.id);
+			expect(char[0].status).to.equal("submitted");
+			expect(char[1].status).to.equal("submitted");
+			expect(player.dmChannel.responses[4]).to.equal("Johnnie, Billy");
+		});
+	});
+
+	describe("approve", () => {
+		it("status should be approved, approver should be admin.id", async () => {
+			await send("char submit Johnnie", player, player.dmChannel);
+			await send("char approve Johnnie", admin, admin.dmChannel);
+			const char = await db.getCharacter("Johnnie");
+			expect(char.status).to.equal("approved");
+			expect(char.approver).to.equal(admin.id);
+		});
+	});
+
 });
 
 describe("fuzzy-matching", () => {

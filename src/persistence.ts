@@ -168,6 +168,40 @@ export class Database {
 			});
 		}
 	}
+
+	async submitCharacter(name: string, version: number): Promise<void>{
+        await this.db.run(
+            `UPDATE characters SET status = $status, version = $version + 1
+         	WHERE name = $name AND version = $version`, {
+            $name: name,
+            $status: "submitted",
+            $version: version   
+            });
+    }
+
+    async listSubmitted(owner: Snowflake): Promise<CharacterRecord[]>{
+        return this.db.all<CharacterRecord>(
+            `SELECT * FROM characters WHERE owner = $owner AND status = $status`,{
+                $status: "submitted",
+                $owner: owner
+            }
+        );
+	}
+	
+	async approveCharacter(name: string, id: Snowflake, time: number): Promise<void>{
+		await this.db.run(
+            `UPDATE characters SET status = $status, approver = $approver, approved = $approved
+			WHERE name = $name`, {
+		   
+				$status: "approved",
+				$approver: id,
+				$approved: time,
+				$name: name
+			}
+		);
+	}
+	
+
 }
 
 /**
